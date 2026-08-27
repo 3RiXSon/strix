@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { otpStart, otpVerify } from "@/data/serverSource";
 import { track } from "@/lib/cta";
+import { primaryBtn } from "@/lib/ui";
 
 /**
  * Compact inline email -> 6-digit-code verify flow. Unlike EmailReportView this
@@ -85,7 +86,7 @@ export default function EmailVerifyInline({ onVerified }: { onVerified: () => vo
           <p className="text-xs text-red-300">{error}</p>
         </div>
       )}
-      {notice && !error && <p className="mb-3 text-xs text-[#888]">{notice}</p>}
+      {notice && !error && <p className="mb-3 text-xs text-white/45">{notice}</p>}
 
       {step === "email" ? (
         <form
@@ -96,23 +97,18 @@ export default function EmailVerifyInline({ onVerified }: { onVerified: () => vo
           }}
         >
           <label className="block">
-            <span className="mb-1.5 block text-xs text-[#888]">Your work email</span>
+            <span className="mb-1.5 block text-xs text-white/45">Your work email</span>
             <input
               type="email"
               autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
-              className="w-full rounded-lg bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-[#444]"
-              style={{ border: "1px solid #2a2a2a" }}
+              className="w-full rounded-lg border border-white/15 bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/40"
             />
-            <span className="mt-1.5 block text-[11px] text-[#666]">Use your work email.</span>
+            <span className="mt-1.5 block text-[11px] text-white/35">Use your work email.</span>
           </label>
-          <button
-            type="submit"
-            disabled={busy}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
+          <button type="submit" disabled={busy} className={`${primaryBtn} w-full`}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
             Send me a code
           </button>
@@ -126,22 +122,17 @@ export default function EmailVerifyInline({ onVerified }: { onVerified: () => vo
           }}
         >
           <label className="block">
-            <span className="mb-1.5 block text-xs text-[#888]">6-digit code</span>
+            <span className="mb-1.5 block text-xs text-white/45">6-digit code</span>
             <input
               inputMode="numeric"
               autoFocus
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="123456"
-              className="w-full rounded-lg bg-black px-3 py-2.5 text-center text-lg font-mono tracking-[0.4em] text-white outline-none transition-colors focus:border-[#444]"
-              style={{ border: "1px solid #2a2a2a" }}
+              className="w-full rounded-lg border border-white/15 bg-black px-3 py-2.5 text-center text-lg font-mono tracking-[0.4em] text-white outline-none transition-colors focus:border-white/40"
             />
           </label>
-          <button
-            type="submit"
-            disabled={busy}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
+          <button type="submit" disabled={busy} className={`${primaryBtn} w-full`}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
             Verify
           </button>
@@ -152,7 +143,7 @@ export default function EmailVerifyInline({ onVerified }: { onVerified: () => vo
               setError(null);
               setNotice(null);
             }}
-            className="w-full cursor-pointer text-center text-xs text-[#666] transition-colors hover:text-[#aaa]"
+            className="w-full cursor-pointer text-center text-xs text-white/40 transition-colors hover:text-white/70"
           >
             Use a different email
           </button>

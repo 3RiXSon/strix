@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  AlertCircle,
-  Bot,
-  Mail,
-  ChevronDown,
-  Radar,
-  Rocket,
-  ArrowUpRight,
-  History,
-} from "lucide-react";
+import { ArrowLeft, AlertCircle, Bot, ChevronDown, History, Mail } from "lucide-react";
 import type { Vulnerability, VulnerabilitySeverity } from "@/types/issues";
 import { SEVERITY_COLORS } from "@/types/issues";
 import { getSeverityDot } from "@/lib/vulnerability-utils";
@@ -34,15 +24,16 @@ import {
   type LoadedRun,
   type RunsPayload,
 } from "@/data/serverSource";
-import { SIGNUP_URL, ctaUrl, trackCta } from "@/lib/cta";
+import { trackCta } from "@/lib/cta";
 import { runTitle } from "@/lib/target-utils";
-import Sidebar from "@/components/Sidebar";
+import { card, cardPad, primaryBtn } from "@/lib/ui";
+import DesktopNav from "@/components/nav/DesktopNav";
+import MobileNav from "@/components/nav/MobileNav";
 import PastRunsView from "@/components/PastRunsView";
 import EmailReportView from "@/components/EmailReportView";
 import { RunDetails } from "@/components/RunDetails";
 import { TrustToast } from "@/components/TrustToast";
 import FeedbackView from "@/components/FeedbackView";
-import { ProInlineCta } from "@/components/ProCta";
 
 export type View = "overview" | "issues" | "agents" | "history" | "email" | "feedback";
 
@@ -216,8 +207,8 @@ export default function App() {
     userSetView("email");
   }, [userSetView]);
 
-  // Sidebar entry keeps the disclosure (first place those users see it);
-  const openEmail = useCallback(() => goEmail(false, "sidebar"), [goEmail]);
+  // Nav entry keeps the disclosure (first place those users see it);
+  const openEmail = useCallback(() => goEmail(false, "nav"), [goEmail]);
   // the Overview CTA already states the tradeoff, so it starts the flow directly.
   const openEmailFromOverview = useCallback(() => goEmail(true, "overview"), [goEmail]);
 
@@ -237,46 +228,41 @@ export default function App() {
     await refreshRuns();
   }, [refreshAuth, refreshRuns]);
 
-  return (
-    <div className="min-h-screen bg-black text-white flex">
-      <Sidebar
-        view={view}
-        onSelectView={(v) => {
-          // Clicking a sidebar view always lands on that section's top level,
-          // so leaving a specific issue's detail view and clicking "Issues"
-          // returns to the full findings list.
-          setSelectedId(null);
-          if (v === "history") openHistory();
-          else userSetView(v);
-        }}
-        issuesCount={run?.vulnerabilities.length ?? 0}
-        agentCount={agentCount}
-        runCount={runs?.count ?? 0}
-        finished={run?.finished ?? false}
-        verified={verified}
-        email={auth?.email ?? null}
-        onOpenEmail={openEmail}
-        onOpenHistory={openHistory}
-        onForget={() => void onForget()}
-      />
+  const navProps = {
+    view,
+    onSelectView: (v: View) => {
+      // Selecting a nav view always lands on that section's top level, so
+      // leaving a specific issue's detail view and tapping "Issues" returns
+      // to the full findings list.
+      setSelectedId(null);
+      if (v === "history") openHistory();
+      else userSetView(v);
+    },
+    issuesCount: run?.vulnerabilities.length ?? 0,
+    agentCount,
+    runCount: runs?.count ?? 0,
+    finished: run?.finished ?? false,
+    verified,
+    email: auth?.email ?? null,
+    onOpenEmail: openEmail,
+    onOpenHistory: openHistory,
+    onForget: () => void onForget(),
+  };
 
-      <div className="flex-1 min-w-0">
+  return (
+    <div className="min-h-screen bg-black text-white lg:flex">
+      <DesktopNav {...navProps} />
+
+      <div className="min-w-0 flex-1">
         {/* Top bar */}
-        <div className="border-b border-[#222]">
-          <div className="max-w-[88rem] mx-auto px-3 sm:px-6 py-4 flex items-center gap-1.5">
-            <a
-              href={ctaUrl("https://app.strix.ai", "logo")}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackCta("logo", "topbar")}
-              className="flex items-center gap-1.5 opacity-90 transition-opacity hover:opacity-100 lg:hidden"
-              title="Open Strix Cloud"
-            >
-              <img src="./logo.png" alt="Strix" className="w-10 h-8 object-cover" />
-              <div className="text-base text-white font-medium tracking-tight">Strix</div>
-            </a>
+        <div className="sticky top-0 z-30 border-b border-white/10 bg-black/95 backdrop-blur">
+          <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-3.5 sm:px-6">
+            <div className="flex items-center gap-1.5 lg:hidden">
+              <img src="./logo.png" alt="Strix" className="h-6 w-8 object-cover" />
+              <span className="text-sm font-medium tracking-tight text-white">Strix</span>
+            </div>
             {run && <LiveIndicator finished={run.finished} />}
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-2">
               {verified && runs && !runs.locked && runs.runs.length > 0 && (
                 <RunSwitcher
                   runs={runs}
@@ -285,24 +271,14 @@ export default function App() {
                   onSelect={selectRun}
                 />
               )}
-              <a
-                href={ctaUrl(SIGNUP_URL, "run_in_cloud")}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackCta("run_in_cloud", "topbar")}
-                className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-black transition-opacity hover:opacity-90"
-              >
-                Run in the cloud
-                <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
-              </a>
             </div>
           </div>
         </div>
 
-        <div className="max-w-[88rem] mx-auto px-3 sm:px-6 py-8 sm:py-12 space-y-6">
+        <main className="mx-auto max-w-4xl space-y-6 px-4 py-6 pb-24 sm:px-6 sm:py-10 lg:pb-10">
           {error && !run && view !== "history" && view !== "email" && (
-            <div className="rounded-lg px-4 py-3 flex gap-3 items-start border border-red-500/30 bg-red-500/5">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-400" aria-hidden="true" />
+            <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5 text-red-400" aria-hidden="true" />
               <p className="text-sm text-red-300">{error}</p>
             </div>
           )}
@@ -333,8 +309,8 @@ export default function App() {
           ) : view === "history" ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-[#888]" aria-hidden="true" />
-                <h1 className="text-2xl font-semibold text-white">Past runs</h1>
+                <History className="w-5 h-5 text-white/45" aria-hidden="true" />
+                <h1 className="text-xl font-semibold text-white sm:text-2xl">Past runs</h1>
               </div>
               <PastRunsView
                 runs={runs}
@@ -344,28 +320,13 @@ export default function App() {
               />
             </div>
           ) : !run && !error ? (
-            <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-10 text-center">
-              <div className="w-6 h-6 mx-auto mb-3 rounded-full border-2 border-[#333] border-t-white animate-spin" />
-              <p className="text-sm text-[#888]">Loading run data…</p>
+            <div className={`${card} ${cardPad} text-center py-10`}>
+              <div className="w-6 h-6 mx-auto mb-3 rounded-full border-2 border-white/15 border-t-white animate-spin" />
+              <p className="text-sm text-white/45">Loading run data…</p>
             </div>
           ) : run && counts ? (
             <>
               <SummaryHeader summary={run.summary} />
-
-              {/* Tab strip: shown on small screens where the sidebar is hidden. */}
-              <div className="flex gap-5 border-b border-[#2a2a2a] lg:hidden">
-                <TabButton active={view === "overview"} onClick={() => userSetView("overview")}>
-                  Pentest Overview
-                </TabButton>
-                <TabButton active={view === "issues"} onClick={() => userSetView("issues")}>
-                  Issues{run.vulnerabilities.length > 0 ? ` (${run.vulnerabilities.length})` : ""}
-                </TabButton>
-                {agentCount > 0 && (
-                  <TabButton active={view === "agents"} onClick={() => userSetView("agents")}>
-                    Agents ({agentCount})
-                  </TabButton>
-                )}
-              </div>
 
               {view === "overview" ? (
                 <OverviewTab
@@ -383,7 +344,7 @@ export default function App() {
                 <div className="space-y-4">
                   <button
                     onClick={() => setSelectedId(null)}
-                    className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-[#888] hover:text-white transition-colors"
+                    className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white transition-colors"
                   >
                     <ArrowLeft className="w-4 h-4" /> Back to all findings
                   </button>
@@ -399,8 +360,10 @@ export default function App() {
             </>
           ) : null}
           </div>
-        </div>
+        </main>
       </div>
+
+      <MobileNav {...navProps} />
       <TrustToast message={TRUST_BANNER} />
     </div>
   );
@@ -426,19 +389,15 @@ function RunSwitcher({
         onClick={() => setOpen((o) => !o)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         aria-label="Switch pentest"
-        className="flex items-center gap-2 rounded-lg border border-[#3a3a3a] bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm text-white transition-colors hover:border-[#555] hover:bg-[rgba(255,255,255,0.09)]"
+        className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm text-white transition-colors hover:border-white/30 hover:bg-white/[0.08]"
       >
-        <History className="h-4 w-4 flex-shrink-0 text-[#888]" aria-hidden="true" />
-        <span className="flex-shrink-0 text-[#888]">Pentest</span>
-        <span className="max-w-[260px] truncate font-medium">{current}</span>
-        <ChevronDown className="h-4 w-4 flex-shrink-0 text-[#aaa]" aria-hidden="true" />
+        <History className="h-4 w-4 flex-shrink-0 text-white/45" aria-hidden="true" />
+        <span className="hidden max-w-[200px] truncate font-medium sm:inline">{current}</span>
+        <ChevronDown className="h-4 w-4 flex-shrink-0 text-white/45" aria-hidden="true" />
       </button>
       {open && (
-        <div
-          className="absolute right-0 z-50 mt-2 max-h-96 w-96 overflow-y-auto rounded-xl py-1.5 shadow-2xl"
-          style={{ border: "1px solid #3a3a3a", background: "#0a0a0a" }}
-        >
-          <div className="border-b border-[#222] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-[#666]">
+        <div className="absolute right-0 z-50 mt-2 max-h-96 w-[min(90vw,24rem)] overflow-y-auto rounded-xl border border-white/10 bg-[#0a0a0a] py-1.5 shadow-2xl">
+          <div className="border-b border-white/10 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-white/35">
             Switch pentest
           </div>
           {runs.runs.map((r) => {
@@ -447,13 +406,13 @@ function RunSwitcher({
               <button
                 key={r.name}
                 onMouseDown={() => onSelect(r.name)}
-                className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-[rgba(255,255,255,0.06)] ${
-                  active ? "bg-[rgba(255,255,255,0.04)] text-white" : "text-[#aaa]"
+                className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.06] ${
+                  active ? "bg-white/[0.04] text-white" : "text-white/60"
                 }`}
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{runTitle(r.target, r.name)}</span>
-                  {r.target && <span className="block truncate font-mono text-xs text-[#666]">{r.target}</span>}
+                  {r.target && <span className="block truncate font-mono text-xs text-white/35">{r.target}</span>}
                 </span>
                 {active && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400" />}
               </button>
@@ -468,14 +427,14 @@ function RunSwitcher({
 function LiveIndicator({ finished }: { finished: boolean }) {
   if (finished) {
     return (
-      <span className="ml-3 inline-flex items-center gap-1.5 text-xs text-[#888]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#555]" />
+      <span className="inline-flex items-center gap-1.5 text-xs text-white/45">
+        <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
         Complete
       </span>
     );
   }
   return (
-    <span className="ml-3 inline-flex items-center gap-1.5 text-xs text-emerald-400">
+    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-400">
       <span className="relative flex h-1.5 w-1.5">
         <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -498,12 +457,12 @@ function SummaryHeader({ summary }: { summary: ParsedRunSummary }) {
   const duration = formatDuration(summary.durationSeconds);
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-white">
+      <h1 className="text-xl font-semibold text-white sm:text-2xl">
         {runTitle(summary.targets[0] ?? null, summary.runName ?? summary.runId ?? "Pentest results")}
       </h1>
-      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#888]">
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/45">
         {summary.targets.length > 0 && (
-          <span className="font-mono text-[#aaa]">{summary.targets.join(", ")}</span>
+          <span className="font-mono text-white/60 break-all">{summary.targets.join(", ")}</span>
         )}
         {summary.scanMode && <Meta label={summary.scanMode} />}
         {duration && <Meta label={duration} />}
@@ -516,7 +475,7 @@ function SummaryHeader({ summary }: { summary: ParsedRunSummary }) {
 function Meta({ label }: { label: string }) {
   return (
     <>
-      <span className="text-[#333]">·</span>
+      <span className="text-white/20">·</span>
       <span className="capitalize">{label}</span>
     </>
   );
@@ -536,25 +495,8 @@ function FindingsList({
   );
   if (sorted.length === 0) {
     return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-8 text-center text-sm text-[#888]">
-          {finished ? "No findings in this run." : "No findings yet. The pentest is still running…"}
-        </div>
-        {finished && (
-          <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5">
-            <p className="text-sm font-medium text-white">Stay ahead of new exposures</p>
-            <p className="mt-0.5 mb-3 text-xs text-[#666]">
-              Attack surface monitoring catches new exposures for your org over time.
-            </p>
-            <ProInlineCta
-              label="Attack surface monitoring"
-              desc="Continuous coverage for your whole org."
-              slug="asm"
-              surface="empty_state"
-              icon={Radar}
-            />
-          </div>
-        )}
+      <div className={`${card} ${cardPad} text-center text-sm text-white/45 py-10`}>
+        {finished ? "No findings in this run." : "No findings yet. The pentest is still running…"}
       </div>
     );
   }
@@ -564,13 +506,13 @@ function FindingsList({
         <button
           key={v.id}
           onClick={() => onSelect(v.id)}
-          className="animate-card-in cursor-pointer w-full text-left rounded-lg border border-[#222] hover:border-[#444] bg-[rgba(255,255,255,0.02)] px-4 py-3 transition-colors flex items-center gap-3"
+          className="animate-card-in cursor-pointer w-full text-left rounded-xl border border-white/10 hover:border-white/25 bg-white/[0.02] px-4 py-3.5 transition-colors flex items-center gap-3"
         >
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${getSeverityDot(v.severity)}`} aria-hidden="true" />
           <span className="flex-1 min-w-0">
             <span className="block text-sm font-medium text-white truncate">{v.title}</span>
             {v.target && (
-              <span className="block text-xs text-[#666] font-mono truncate">{v.target}</span>
+              <span className="block text-xs text-white/40 font-mono truncate">{v.target}</span>
             )}
           </span>
           <span
@@ -611,24 +553,21 @@ function EmailReportCta({ onOpenEmail }: { onOpenEmail: () => void }) {
   return (
     <button
       onClick={onOpenEmail}
-      className="group w-full cursor-pointer rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-4 text-left transition-colors hover:border-emerald-500/40"
+      className="group w-full cursor-pointer rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] p-4 text-left transition-colors hover:border-emerald-500/40"
     >
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
-          style={{ border: "1px solid rgba(16,185,129,0.3)", background: "rgba(16,185,129,0.08)" }}
-        >
-          <Mail className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10">
+            <Mail className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-white">Email an encrypted PDF report of this run</p>
+            <p className="mt-0.5 text-xs text-white/45">
+              Encrypted with a key only you can see, email verified with a one-time code before sending.
+            </p>
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white">Email an encrypted PDF report of this run</p>
-          <p className="mt-0.5 text-xs text-[#888]">
-            Encrypted with a key only you can see, email verified with a one-time code before sending.
-          </p>
-        </div>
-        <span className="flex-shrink-0 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-black transition-opacity group-hover:opacity-90">
-          Export report to PDF
-        </span>
+        <span className={`${primaryBtn} flex-shrink-0 w-full sm:w-auto`}>Export report to PDF</span>
       </div>
     </button>
   );
@@ -669,7 +608,7 @@ function OverviewTab({
       </div>
 
       {total > 0 && (
-        <div className="animate-card-in rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5">
+        <div className={`animate-card-in ${card} ${cardPad}`}>
           <IssueSeveritySummary findings={{ total, ...counts }} />
         </div>
       )}
@@ -683,44 +622,22 @@ function OverviewTab({
       )}
 
       {sections.length > 0 ? (
-        <div className="animate-card-in rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5 space-y-8">
+        <div className={`animate-card-in ${card} ${cardPad} space-y-8`}>
           {sections.map((s) => (
             <ContentSection key={s.title} title={s.title} content={s.content} />
           ))}
         </div>
       ) : reportMarkdown ? (
-        <div className="animate-card-in rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5">
+        <div className={`animate-card-in ${card} ${cardPad}`}>
           <ContentSection content={dedupeHeadings(reportMarkdown)} />
         </div>
       ) : (
         total === 0 && (
-          <p className="text-sm text-[#888]">No summary available for this run yet.</p>
+          <p className="text-sm text-white/45">No summary available for this run yet.</p>
         )
       )}
 
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`cursor-pointer relative pb-2.5 text-sm font-semibold transition-colors ${
-        active ? "text-white" : "text-[#666] hover:text-white"
-      }`}
-    >
-      {children}
-      {active && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-white rounded-full" />}
-    </button>
   );
 }
 
@@ -736,18 +653,18 @@ function AgentsTab({ run, canSteer }: { run: LoadedRun; canSteer: boolean }) {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5">
+      <div className={`${card} ${cardPad}`}>
         <div className="flex items-center gap-2">
-          <Bot className="w-4 h-4 text-[#888]" aria-hidden="true" />
+          <Bot className="w-4 h-4 text-white/45" aria-hidden="true" />
           <h2 className="text-sm font-semibold text-white">Agent graph</h2>
-          <span className="text-xs text-[#666]">
+          <span className="text-xs text-white/35">
             {agents.length} agent{agents.length === 1 ? "" : "s"}
           </span>
         </div>
-        <p className="mt-1 mb-4 text-xs text-[#666]">
-          Click an agent to open its full transcript.
+        <p className="mt-1 mb-4 text-xs text-white/35">
+          Tap an agent to open its full transcript.
         </p>
-        <div className="h-[480px] rounded-lg border border-[#1a1a1a] overflow-hidden">
+        <div className="h-[65vh] sm:h-[480px] rounded-xl border border-white/10 overflow-hidden">
           <AgentGraph
             agents={graphAgents}
             selectedAgentId={selectedId}
@@ -761,21 +678,6 @@ function AgentsTab({ run, canSteer }: { run: LoadedRun; canSteer: boolean }) {
 
       {/* Live steering: only in-process while the scan runs. Otherwise omitted. */}
       {steerable && <ScanPromptComposer agents={agents} />}
-
-      {/* Re-run always routes to Strix Cloud. */}
-      <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5">
-        <p className="text-sm font-semibold text-white">Run this pentest with more depth</p>
-        <p className="mt-0.5 text-xs text-[#666]">Re-run this pentest on managed infra in the cloud.</p>
-        <div className="mt-3 flex flex-wrap gap-2.5">
-          <ProInlineCta
-            label="Re-run in Strix Pro with more depth"
-            desc="Run this pentest on managed infra with more depth."
-            slug="live_scan"
-            surface="agents"
-            icon={Rocket}
-          />
-        </div>
-      </div>
 
       <AgentDetailModal
         open={selectedAgent !== null}

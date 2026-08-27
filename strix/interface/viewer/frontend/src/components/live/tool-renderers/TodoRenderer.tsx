@@ -21,7 +21,7 @@ const ACTION_LABELS: Record<string, { label: string; Icon: typeof Circle }> = {
 function StatusIcon({ status }: { status: string }) {
   if (status === "done") return <CircleCheckBig className="w-3.5 h-3.5 text-emerald-400/70 shrink-0" />;
   if (status === "in_progress") return <CircleDot className="w-3.5 h-3.5 text-purple-400/70 shrink-0 animate-pulse" />;
-  return <Circle className="w-3.5 h-3.5 text-[#444] shrink-0" />;
+  return <Circle className="w-3.5 h-3.5 text-white/30 shrink-0" />;
 }
 
 function TodoList({ todos, highlightId }: { todos: TodoItem[]; highlightId?: string }) {
@@ -43,10 +43,10 @@ function TodoList({ todos, highlightId }: { todos: TodoItem[]; highlightId?: str
             <span
               className={`text-[13px] leading-snug ${
                 s === "done"
-                  ? "text-[#555] line-through"
+                  ? "text-white/35 line-through"
                   : s === "in_progress"
-                    ? "text-[#bbb]"
-                    : "text-[#999]"
+                    ? "text-white/70"
+                    : "text-white/60"
               }`}
             >
               {todo.title ?? "(untitled)"}
@@ -71,7 +71,7 @@ export default function TodoRenderer({ toolName, args, result }: ToolRendererPro
           <ActionIcon className="w-3.5 h-3.5 text-purple-400/60" />
           <span className="text-purple-400/80 font-semibold text-sm">{action.label}</span>
         </div>
-        <div className="mt-1.5 text-[#888] text-[13px]">{res.trim()}</div>
+        <div className="mt-1.5 text-white/50 text-[13px]">{res.trim()}</div>
       </div>
     );
   }

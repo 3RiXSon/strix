@@ -4,8 +4,10 @@ import { ShieldCheck, X } from "lucide-react";
 const DISMISS_KEY = "strix_viewer_trust_dismissed";
 
 /**
- * One-time privacy notice, shown as a toast pinned over the sidebar. Dismissing
- * it persists to localStorage so it never returns on reload or view changes.
+ * One-time privacy notice, shown as a toast. Pinned above the mobile bottom
+ * nav bar on small screens, above the desktop nav rail's footer otherwise.
+ * Dismissing it persists to localStorage so it never returns on reload or
+ * view changes.
  */
 export function TrustToast({ message }: { message: string }) {
   const [dismissed, setDismissed] = useState<boolean>(() => {
@@ -29,17 +31,16 @@ export function TrustToast({ message }: { message: string }) {
 
   return (
     <div
-      className="fixed bottom-3 left-3 z-[60] max-w-xs rounded-lg bg-[#0a0a0a] p-3 shadow-2xl"
-      style={{ border: "1px solid #2a2a2a" }}
+      className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-30 max-w-xs rounded-lg border border-white/10 bg-[#0a0a0a] p-3 shadow-2xl sm:inset-x-auto sm:bottom-3 sm:left-3"
       role="status"
     >
       <div className="flex gap-2.5">
         <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" aria-hidden="true" />
-        <p className="text-xs leading-relaxed text-[#aaa]">{message}</p>
+        <p className="text-xs leading-relaxed text-white/70">{message}</p>
         <button
           onClick={dismiss}
           aria-label="Dismiss"
-          className="-mr-0.5 -mt-0.5 flex-shrink-0 cursor-pointer rounded p-0.5 text-[#666] transition-colors hover:text-white"
+          className="-mr-0.5 -mt-0.5 flex-shrink-0 cursor-pointer rounded p-0.5 text-white/40 transition-colors hover:text-white"
         >
           <X className="h-3.5 w-3.5" />
         </button>

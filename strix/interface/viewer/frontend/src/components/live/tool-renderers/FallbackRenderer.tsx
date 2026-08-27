@@ -28,9 +28,9 @@ export default function FallbackRenderer({ toolName, args, result }: ToolRendere
   const resultText = pretty(result);
   return (
     <div>
-      <span className="text-[#888] font-semibold text-sm">{toolName.replace(/_/g, " ")}</span>
-      {argsText && <CodeBlock className="text-[#777]">{argsText}</CodeBlock>}
-      {resultText && <CodeBlock className="text-[#666]">{resultText}</CodeBlock>}
+      <span className="text-white/50 font-semibold text-sm">{toolName.replace(/_/g, " ")}</span>
+      {argsText && <CodeBlock className="text-white/45">{argsText}</CodeBlock>}
+      {resultText && <CodeBlock className="text-white/40">{resultText}</CodeBlock>}
     </div>
   );
 }
