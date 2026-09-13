@@ -36,12 +36,12 @@ export function IssueSeveritySummary({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 sm:gap-x-8">
         <div className="flex items-center gap-2">
           <span className="text-2xl font-semibold text-white tabular-nums">{findings.total}</span>
-          <span className="text-sm text-[#666]">{unit}</span>
+          <span className="text-sm text-white/45">{unit}</span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 sm:gap-x-6">
           {SEVERITIES.map(({ key, label, dotClass, textClass }) => {
             const count = findings[key];
             if (count <= 0) return null;
@@ -50,7 +50,7 @@ export function IssueSeveritySummary({
               <div key={key} className="flex items-center gap-1.5">
                 <div className={cn("w-2 h-2 rounded-full", dotClass)} aria-hidden="true" />
                 <span className={cn("text-sm tabular-nums", textClass)}>{count}</span>
-                <span className="text-xs text-[#555]">{label}</span>
+                <span className="text-xs text-white/40">{label}</span>
               </div>
             );
           })}
@@ -58,7 +58,7 @@ export function IssueSeveritySummary({
         {trailing ? <div className="flex items-center gap-2">{trailing}</div> : null}
       </div>
 
-      <div className="h-1.5 rounded-full bg-[#222] overflow-hidden flex">
+      <div className="h-1.5 rounded-full bg-white/10 overflow-hidden flex">
         {SEVERITIES.map(({ key, dotClass }) => {
           const count = findings[key];
           if (count <= 0) return null;

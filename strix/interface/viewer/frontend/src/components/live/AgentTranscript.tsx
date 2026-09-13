@@ -20,7 +20,7 @@ class RendererErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <span className="text-[#555] font-semibold text-sm">
+        <span className="text-white/35 font-semibold text-sm">
           {this.props.toolName.replace(/_/g, " ")}
         </span>
       );
@@ -122,7 +122,7 @@ const STATUS_STYLE: Record<string, string> = {
   completed: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
   running: "text-blue-400 border-blue-500/30 bg-blue-500/10",
   waiting: "text-yellow-400 border-yellow-500/30 bg-yellow-500/10",
-  stopped: "text-[#aaa] border-[#333] bg-[#1a1a1a]",
+  stopped: "text-white/60 border-white/15 bg-white/[0.04]",
   crashed: "text-red-400 border-red-500/30 bg-red-500/10",
   failed: "text-red-400 border-red-500/30 bg-red-500/10",
 };
@@ -221,14 +221,14 @@ export function AgentTranscript({
             <span className="text-base font-semibold text-white truncate">{agent.name}</span>
             <span
               className={`flex-shrink-0 text-xs font-medium capitalize px-2 py-0.5 rounded-full border ${
-                STATUS_STYLE[agent.status] ?? "text-[#aaa] border-[#333] bg-[#1a1a1a]"
+                STATUS_STYLE[agent.status] ?? "text-white/60 border-white/15 bg-white/[0.04]"
               }`}
             >
               {agent.status}
             </span>
-            <span className="font-mono text-xs text-[#555]">{agent.id}</span>
+            <span className="font-mono text-xs text-white/35">{agent.id}</span>
           </div>
-          <p className="text-xs text-[#666] mb-4">
+          <p className="text-xs text-white/40 mb-4">
             {msgCount} message{msgCount === 1 ? "" : "s"} · {toolCount} tool call
             {toolCount === 1 ? "" : "s"}
           </p>
@@ -236,7 +236,7 @@ export function AgentTranscript({
       )}
 
       {mine.length === 0 ? (
-        <p className="text-sm text-[#666]">No recorded activity for this agent.</p>
+        <p className="text-sm text-white/40">No recorded activity for this agent.</p>
       ) : (
         <div className="py-1">
           {mine.map((event, i) => {
@@ -260,20 +260,20 @@ export function AgentTranscript({
             const status = isTool ? String(event.data?.status ?? "completed") : "completed";
 
             return (
-              <div key={event.id} className="flex gap-3">
+              <div key={event.id} className="flex gap-2.5 sm:gap-3">
                 <div className="flex flex-col items-center shrink-0">
                   <div
-                    className={`w-[30px] h-[30px] rounded-full bg-black border flex items-center justify-center shrink-0 ${
+                    className={`w-[26px] h-[26px] sm:w-[30px] sm:h-[30px] rounded-full bg-black border flex items-center justify-center shrink-0 ${
                       isTool && status === "running"
                         ? "border-blue-500/40 animate-pulse"
                         : isTool && status === "failed"
                           ? "border-red-500/30"
-                          : "border-[#222]"
+                          : "border-white/10"
                     }`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
                   </div>
-                  {!isLast && <div className="w-px flex-1 bg-[#1a1a1a] mt-1" />}
+                  {!isLast && <div className="w-px flex-1 bg-white/[0.08] mt-1" />}
                 </div>
                 <div className="flex-1 min-w-0 pt-[5px] pb-6">
                   {isTool ? (

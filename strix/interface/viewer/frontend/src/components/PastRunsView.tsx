@@ -3,6 +3,7 @@ import { History, ChevronRight, Terminal } from "lucide-react";
 import type { RunListEntry, RunsPayload, RunSeverityCounts } from "@/data/serverSource";
 import { runTitle } from "@/lib/target-utils";
 import { trackCta } from "@/lib/cta";
+import { card, cardPad, primaryBtn } from "@/lib/ui";
 import EmailVerifyInline from "@/components/EmailVerifyInline";
 
 /**
@@ -22,7 +23,7 @@ const SEV = [
 function SeverityChips({ counts }: { counts: RunSeverityCounts }) {
   const shown = SEV.filter((s) => counts[s.key] > 0);
   if (shown.length === 0) {
-    return <span className="text-xs text-[#555]">No findings</span>;
+    return <span className="text-xs text-white/30">No findings</span>;
   }
   return (
     <div className="flex items-center gap-3">
@@ -87,20 +88,17 @@ export default function PastRunsView({
 
   if (!runs || runs.locked) {
     return (
-      <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-8 text-center">
-        <div
-          className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl"
-          style={{ border: "1px solid #2a2a2a", background: "rgba(255,255,255,0.04)" }}
-        >
-          <History className="h-5 w-5 text-[#888]" aria-hidden="true" />
+      <div className={`${card} ${cardPad} py-10 text-center`}>
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5">
+          <History className="h-5 w-5 text-white/45" aria-hidden="true" />
         </div>
         <h2 className="text-base font-semibold text-white">Browse every run on this machine</h2>
-        <p className="mx-auto mt-1.5 max-w-md text-sm text-[#888]">
+        <p className="mx-auto mt-1.5 max-w-md text-sm text-white/45">
           You have {count} past {count === 1 ? "run" : "runs"} on this machine.
         </p>
         {showVerify ? (
           <>
-            <p className="mx-auto mt-3 max-w-sm text-xs text-[#666]">
+            <p className="mx-auto mt-3 max-w-sm text-xs text-white/35">
               Verify your email with a one-time code to unlock the full history.
             </p>
             <EmailVerifyInline onVerified={onVerified} />
@@ -111,15 +109,15 @@ export default function PastRunsView({
               trackCta("history_unlock", "past_runs");
               setShowVerify(true);
             }}
-            className="mt-4 cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90"
+            className={`${primaryBtn} mt-4`}
           >
             View runs
           </button>
         )}
-        <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-[#555]">
+        <p className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-xs text-white/30">
           <Terminal className="h-3.5 w-3.5" aria-hidden="true" />
           Or open one from the CLI with{" "}
-          <code className="font-mono text-[#888]">strix view &lt;name&gt;</code>
+          <code className="font-mono text-white/45">strix view &lt;name&gt;</code>
         </p>
       </div>
     );
@@ -127,7 +125,7 @@ export default function PastRunsView({
 
   if (runs.runs.length === 0) {
     return (
-      <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-8 text-center text-sm text-[#888]">
+      <div className={`${card} ${cardPad} text-center text-sm text-white/45 py-10`}>
         No past runs found on this machine yet.
       </div>
     );
@@ -143,31 +141,33 @@ export default function PastRunsView({
           <button
             key={run.name}
             onClick={() => onSelectRun(run.name)}
-            className={`animate-card-in group flex w-full cursor-pointer items-center gap-4 rounded-lg border px-4 py-3 text-left transition-colors ${
+            className={`animate-card-in group flex w-full cursor-pointer flex-col gap-2 rounded-xl border px-4 py-3.5 text-left transition-colors sm:flex-row sm:items-center sm:gap-4 ${
               active
-                ? "border-[#444] bg-[rgba(255,255,255,0.04)]"
-                : "border-[#222] bg-[rgba(255,255,255,0.02)] hover:border-[#444]"
+                ? "border-white/25 bg-white/[0.05]"
+                : "border-white/10 bg-white/[0.02] hover:border-white/25"
             }`}
           >
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="truncate text-sm font-medium text-white">{title}</span>
                 {active && (
-                  <span className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400" style={{ border: "1px solid rgba(16,185,129,0.3)" }}>
+                  <span className="rounded-full border border-emerald-500/30 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
                     Active
                   </span>
                 )}
               </div>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[#666]">
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-white/40">
                 {run.scan_mode && <span className="capitalize">{run.scan_mode}</span>}
-                {run.scan_mode && (date || run.status) && <span className="text-[#333]">·</span>}
+                {run.scan_mode && (date || run.status) && <span className="text-white/20">·</span>}
                 {date && <span>{date}</span>}
-                {date && run.status && <span className="text-[#333]">·</span>}
+                {date && run.status && <span className="text-white/20">·</span>}
                 {run.status && <span className="capitalize">{run.status}</span>}
               </div>
             </div>
-            <SeverityChips counts={run.severity_counts} />
-            <ChevronRight className="h-4 w-4 flex-shrink-0 text-[#555] transition-colors group-hover:text-[#aaa]" aria-hidden="true" />
+            <div className="flex items-center justify-between gap-3 sm:justify-end">
+              <SeverityChips counts={run.severity_counts} />
+              <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/25 transition-colors group-hover:text-white/50" aria-hidden="true" />
+            </div>
           </button>
         );
       })}

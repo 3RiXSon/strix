@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { formatNumber } from "@/lib/display-number";
+import { card, cardPad } from "@/lib/ui";
 
 /**
  * "Run details" card for the Overview tab: the launch configuration the run was
@@ -41,9 +42,9 @@ function fmtDuration(seconds: number | null): string {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[7rem_1fr] gap-3 items-baseline">
-      <dt className="text-[11px] uppercase tracking-wide text-[#666]">{label}</dt>
-      <dd className="min-w-0 break-words text-sm text-[#ddd]">{children}</dd>
+    <div className="grid grid-cols-[6.5rem_1fr] gap-3 items-baseline sm:grid-cols-[7rem_1fr]">
+      <dt className="text-[11px] uppercase tracking-wide text-white/35">{label}</dt>
+      <dd className="min-w-0 break-words text-sm text-white/80">{children}</dd>
     </div>
   );
 }
@@ -103,30 +104,30 @@ export function RunDetails({
   const subscription = str(raw.auth_mode) === "subscription";
 
   const sub = (n: number, word: string) => (
-    <span className="text-[#666]"> ({formatNumber(n)} {word})</span>
+    <span className="text-white/35"> ({formatNumber(n)} {word})</span>
   );
 
   return (
-    <div className="rounded-xl border border-[#222] bg-[rgba(255,255,255,0.02)] p-5">
+    <div className={`${card} ${cardPad}`}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full cursor-pointer items-center gap-2 text-left"
+        className="flex w-full cursor-pointer items-center gap-2 text-left min-h-[32px]"
       >
-        <Info className="h-4 w-4 text-[#888]" aria-hidden="true" />
+        <Info className="h-4 w-4 text-white/45" aria-hidden="true" />
         <h2 className="text-sm font-semibold text-white">Run details</h2>
         {open ? (
-          <ChevronUp className="ml-auto h-4 w-4 text-[#666]" aria-hidden="true" />
+          <ChevronUp className="ml-auto h-4 w-4 text-white/35" aria-hidden="true" />
         ) : (
-          <ChevronDown className="ml-auto h-4 w-4 text-[#666]" aria-hidden="true" />
+          <ChevronDown className="ml-auto h-4 w-4 text-white/35" aria-hidden="true" />
         )}
       </button>
 
       {open && (
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
         <section>
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-[#555]">
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-white/30">
             Configuration
           </h3>
           <dl className="space-y-2.5">
@@ -135,9 +136,9 @@ export function RunDetails({
                 <div className="space-y-1">
                   {targets.map((t, i) => (
                     <div key={i} className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[#ddd]">{t.display}</span>
+                      <span className="font-mono text-white/80 break-all">{t.display}</span>
                       {t.type && (
-                        <span className="rounded-full border border-[#2a2a2a] px-1.5 py-0.5 text-[10px] text-[#888]">
+                        <span className="rounded-full border border-white/15 px-1.5 py-0.5 text-[10px] text-white/45">
                           {t.type}
                         </span>
                       )}
@@ -150,7 +151,7 @@ export function RunDetails({
               {instruction ? (
                 <span className="whitespace-pre-wrap">{instruction}</span>
               ) : (
-                <span className="text-[#666]">None</span>
+                <span className="text-white/35">None</span>
               )}
             </Field>
             {scanMode && <Field label="Pentest mode">{scanMode}</Field>}
@@ -158,7 +159,7 @@ export function RunDetails({
             <Field label="Mode">{nonInteractive ? "Non-interactive" : "Interactive"}</Field>
             {localSources.length > 0 && (
               <Field label="Local sources">
-                <div className="space-y-0.5 font-mono text-[#ddd]">
+                <div className="space-y-0.5 font-mono text-white/80 break-all">
                   {localSources.map((s, i) => (
                     <div key={i}>{s}</div>
                   ))}
@@ -170,7 +171,7 @@ export function RunDetails({
         </section>
 
         <section>
-          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-[#555]">
+          <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-white/30">
             Usage &amp; cost
           </h3>
           {hasUsage ? (
@@ -179,7 +180,7 @@ export function RunDetails({
               {subscription && (
                 <Field label="Provider">
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="rounded-full border border-[#22c55e]/40 bg-[#22c55e]/10 px-2 py-0.5 text-[11px] text-[#22c55e]">
+                    <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-400">
                       ChatGPT subscription
                     </span>
                   </span>
@@ -202,8 +203,8 @@ export function RunDetails({
               {totalTokens != null && <Field label="Total tokens">{formatNumber(totalTokens)}</Field>}
               {subscription ? (
                 <Field label="Cost">
-                  <span className="text-[#22c55e]">$0.00</span>
-                  <span className="text-[#666]"> (subscription)</span>
+                  <span className="text-emerald-400">$0.00</span>
+                  <span className="text-white/35"> (subscription)</span>
                 </Field>
               ) : (
                 cost != null && <Field label="Cost">${cost.toFixed(2)}</Field>
@@ -211,7 +212,7 @@ export function RunDetails({
               {agents.length > 0 && <Field label="Agents">{formatNumber(agents.length)}</Field>}
             </dl>
           ) : (
-            <p className="text-sm text-[#666]">Not available yet.</p>
+            <p className="text-sm text-white/35">Not available yet.</p>
           )}
         </section>
       </div>

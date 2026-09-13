@@ -9,7 +9,7 @@ const STATUS_DOT: Record<string, string> = {
   completed: "bg-emerald-400",
   running: "bg-blue-400",
   waiting: "bg-yellow-400",
-  stopped: "bg-[#888]",
+  stopped: "bg-white/40",
   crashed: "bg-red-400",
   failed: "bg-red-400",
 };
@@ -18,13 +18,12 @@ const STATUS_DOT: Record<string, string> = {
 const NEAR_BOTTOM_PX = 80;
 
 /**
- * Overlay modal showing a single agent's full transcript. A centered
- * ``max-w-6xl`` / ``60vh`` panel that animates in and out via the shared
- * ``agent-modal`` data-state keyframes (fade), with a pinned header
- * (status dot + agent name),
- * the transcript scrolling beneath it, and a footer. Auto-scrolls to follow new
- * activity while the user is near the bottom. Closes on backdrop click, the X
- * button, or Escape.
+ * Overlay showing a single agent's full transcript: a full-screen sheet on
+ * mobile (slides up from the bottom), a centered ``max-w-6xl`` / ``70vh``
+ * panel on desktop. Pinned header (status dot + agent name), the transcript
+ * scrolling beneath it, and an optional steering footer. Auto-scrolls to
+ * follow new activity while the user is near the bottom. Closes on backdrop
+ * click, the X button, or Escape.
  *
  * Driven by an ``open`` prop (rather than conditional mounting) so the exit
  * animation can play before unmount; the last agent is retained through the
@@ -46,7 +45,7 @@ export function AgentDetailModal({
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(false);
 
-  // Keep the modal mounted through its exit animation (see UpgradeModal).
+  // Keep the modal mounted through its exit animation.
   const [render, setRender] = useState(open);
   const [state, setState] = useState<"open" | "closed">(open ? "open" : "closed");
   // Defer the (heavy) transcript one frame so the shell + fade paint instantly
@@ -68,7 +67,7 @@ export function AgentDetailModal({
       return;
     }
     setState("closed");
-    const t = setTimeout(() => setRender(false), 140);
+    const t = setTimeout(() => setRender(false), 200);
     return () => clearTimeout(t);
   }, [open]);
 
@@ -116,42 +115,47 @@ export function AgentDetailModal({
   return (
     <div
       data-state={state}
-      className="agent-modal fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 sm:p-8"
+      className="dialog-overlay fixed inset-0 z-50 flex items-end justify-center bg-black/80 sm:items-center sm:p-6"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={`Agent ${shownAgent.name}`}
     >
       <div
-        className="relative flex h-[60vh] w-[calc(100vw-4rem)] max-w-6xl flex-col overflow-hidden rounded-xl border border-[#222] bg-[#0a0a0a] shadow-2xl"
+        data-state={state}
+        className="sheet-panel relative flex h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl sm:h-[75vh] sm:w-[calc(100vw-4rem)] sm:max-w-5xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-[#222] px-5 py-3.5">
+        <div className="flex justify-center pt-2.5 pb-1 sm:hidden">
+          <div className="h-1 w-9 rounded-full bg-white/15" />
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5 sm:py-3.5">
           <div className="flex min-w-0 items-center gap-2">
             <span
-              className={`h-2 w-2 flex-shrink-0 rounded-full ${STATUS_DOT[shownAgent.status] ?? "bg-[#888]"}`}
+              className={`h-2 w-2 flex-shrink-0 rounded-full ${STATUS_DOT[shownAgent.status] ?? "bg-white/40"}`}
             />
             <span className="truncate text-sm font-semibold text-white">{shownAgent.name}</span>
-            <span className="flex-shrink-0 font-mono text-xs text-[#555]">{shownAgent.id}</span>
+            <span className="hidden flex-shrink-0 font-mono text-xs text-white/35 sm:inline">{shownAgent.id}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex-shrink-0 rounded-md p-1 text-[#888] transition-colors hover:bg-[#1a1a1a] hover:text-white"
+            className="flex-shrink-0 cursor-pointer rounded-md p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-5">
+        <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5">
           {contentReady && (
             <AgentTranscript agent={shownAgent} events={events} showHeader={false} />
           )}
         </div>
 
         {steerable && (
-          <div className="border-t border-[#222] px-5 py-3">
+          <div className="border-t border-white/10 px-4 py-3 sm:px-5">
             <ScanPromptComposer
               agents={[shownAgent]}
               fixedAgentId={shownAgent.id}

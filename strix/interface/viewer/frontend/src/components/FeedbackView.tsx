@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
 import { IoChatbubblesOutline } from "react-icons/io5";
 import { submitFeedback } from "@/data/serverSource";
+import { card, primaryBtn } from "@/lib/ui";
 import type { View } from "@/App";
 
 const MAX_MESSAGE = 5000;
@@ -48,27 +49,24 @@ export default function FeedbackView({
     <div className="mx-auto max-w-xl space-y-4">
       <button
         onClick={() => onExit("overview")}
-        className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-[#888] transition-colors hover:text-white"
+        className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-white/45 transition-colors hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to results
       </button>
 
       <div className="flex items-center gap-2">
-        <IoChatbubblesOutline className="h-5 w-5 text-[#888]" aria-hidden="true" />
-        <h1 className="text-2xl font-semibold text-white">Feedback &amp; support</h1>
+        <IoChatbubblesOutline className="h-5 w-5 text-white/45" aria-hidden="true" />
+        <h1 className="text-xl font-semibold text-white sm:text-2xl">Feedback &amp; support</h1>
       </div>
 
-      <div
-        className="w-full rounded-2xl bg-[rgba(255,255,255,0.02)] p-6"
-        style={{ border: "1px solid #2a2a2a" }}
-      >
+      <div className={`${card} w-full p-5 sm:p-6`}>
         {step === "sent" ? (
           <div className="flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-400" aria-hidden="true" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-white">Thanks, we got it.</p>
-              <p className="mt-1 text-xs text-[#888]">
+              <p className="mt-1 text-xs text-white/45">
                 We read every message. If it needs a reply, we&apos;ll reach out to the email you gave.
               </p>
               <button
@@ -76,7 +74,7 @@ export default function FeedbackView({
                   setMessage("");
                   setStep("form");
                 }}
-                className="mt-4 cursor-pointer text-xs text-[#888] transition-colors hover:text-white"
+                className="mt-4 cursor-pointer text-xs text-white/45 transition-colors hover:text-white"
               >
                 Send more feedback
               </button>
@@ -84,7 +82,7 @@ export default function FeedbackView({
           </div>
         ) : (
           <>
-            <p className="mb-4 text-xs text-[#666]">
+            <p className="mb-4 text-xs text-white/35">
               Bugs, feature requests, or anything else. Tell us what&apos;s on your mind.
             </p>
 
@@ -96,7 +94,7 @@ export default function FeedbackView({
             )}
 
             <label className="block">
-              <span className="mb-1.5 block text-xs text-[#888]">Your feedback</span>
+              <span className="mb-1.5 block text-xs text-white/45">Your feedback</span>
               <textarea
                 autoFocus
                 value={message}
@@ -104,26 +102,22 @@ export default function FeedbackView({
                 onChange={(e) => setMessage(e.target.value)}
                 rows={5}
                 placeholder="What's working, what's not, what you'd love to see…"
-                className="w-full resize-y rounded-lg border border-[#2a2a2a] bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/50 focus:ring-2 focus:ring-white/10"
+                className="w-full resize-y rounded-lg border border-white/15 bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/40"
               />
             </label>
 
             <label className="mt-4 block">
-              <span className="mb-1.5 block text-xs text-[#888]">Your work email</span>
+              <span className="mb-1.5 block text-xs text-white/45">Your work email</span>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full rounded-lg border border-[#2a2a2a] bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/50 focus:ring-2 focus:ring-white/10"
+                className="w-full rounded-lg border border-white/15 bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/40"
               />
             </label>
 
-            <button
-              onClick={() => void send()}
-              disabled={!canSend}
-              className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
+            <button onClick={() => void send()} disabled={!canSend} className={`${primaryBtn} mt-4 w-full`}>
               {step === "sending" ? "Sending…" : "Send feedback"}
             </button>
           </>

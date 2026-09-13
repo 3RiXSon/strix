@@ -173,6 +173,46 @@ body {
   animation: dialog-overlay-out 140ms ease forwards;
 }
 
+/* Sheet: full-screen bottom sheet on mobile (slide up), centered dialog panel
+   on desktop (fade + scale, reusing the dialog-panel keyframes). Used for the
+   agent detail overlay and the mobile "More" menu. */
+@keyframes sheet-panel-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes sheet-panel-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+.sheet-panel[data-state="open"] {
+  animation: sheet-panel-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sheet-panel[data-state="closed"] {
+  animation: sheet-panel-out 200ms ease forwards;
+}
+@media (min-width: 640px) {
+  .sheet-panel[data-state="open"] {
+    animation: dialog-panel-in 200ms ease;
+  }
+  .sheet-panel[data-state="closed"] {
+    animation: dialog-panel-out 200ms ease forwards;
+  }
+}
+
+/* Safe-area padding for fixed elements pinned to the bottom of the viewport
+   (mobile bottom nav) so they clear the home-indicator / gesture bar. */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Tab content transition. */
 @keyframes tab-in {
   from {

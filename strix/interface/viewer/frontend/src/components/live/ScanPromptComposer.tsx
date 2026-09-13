@@ -143,17 +143,17 @@ export function ScanPromptComposer({
         type="button"
         onClick={handleExpand}
         className={cn(
-          "mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-[#050505] px-5 py-3 text-left transition-colors duration-300 hover:border-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20",
+          "mt-4 flex min-h-[44px] w-full items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-[#050505] px-4 py-3 text-left transition-colors duration-300 hover:border-white/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 sm:px-5",
           className
         )}
         aria-expanded={false}
         aria-label="Expand live prompt composer"
       >
         <div className="flex min-w-0 items-center gap-2">
-          <Sparkles className="h-4 w-4 shrink-0 text-[#666]" />
+          <Sparkles className="h-4 w-4 shrink-0 text-white/45" />
           <span className="truncate text-sm font-medium text-white">Guide the agent</span>
         </div>
-        <ChevronUp className="h-4 w-4 shrink-0 text-[#777]" />
+        <ChevronUp className="h-4 w-4 shrink-0 text-white/45" />
       </button>
     );
   }
@@ -162,41 +162,41 @@ export function ScanPromptComposer({
     <div
       className={cn(
         "mt-4 rounded-2xl border border-white/[0.08] bg-[#050505] overflow-hidden transition-colors duration-300",
-        focused ? "border-white/[0.18]" : "hover:border-white/[0.12]",
+        focused ? "border-white/[0.2]" : "hover:border-white/[0.16]",
         className
       )}
     >
-      <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-4 py-3 sm:px-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#666]" />
+            <Sparkles className="h-4 w-4 text-white/45" />
             <p className="text-sm font-medium text-white">Live prompt</p>
           </div>
-          <p className="mt-0.5 text-xs text-[#777]">Connected</p>
+          <p className="mt-0.5 text-xs text-white/40">Connected</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {isModal ? (
-            <div className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs text-[#aaa]">
+            <div className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs text-white/60">
               Target: <span className="text-white">{targetName}</span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-[#aaa]">Target:</span>
+              <span className="text-xs text-white/55 hidden sm:inline">Target:</span>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setMenuOpen((o) => !o)}
                   onBlur={() => requestAnimationFrame(() => setMenuOpen(false))}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 text-xs text-white transition-colors hover:border-white/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                  className="inline-flex h-8 items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 text-xs text-white transition-colors hover:border-white/[0.2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 cursor-pointer"
                   aria-haspopup="listbox"
                   aria-expanded={menuOpen}
                 >
-                  <span className="max-w-[140px] truncate">{targetName}</span>
-                  <ChevronDown className="h-3.5 w-3.5 text-[#999]" />
+                  <span className="max-w-[120px] truncate">{targetName}</span>
+                  <ChevronDown className="h-3.5 w-3.5 text-white/55" />
                 </button>
                 {menuOpen && (
                   <div
-                    className="absolute right-0 z-10 mt-1 min-w-[160px] overflow-hidden rounded-lg border border-[#333] bg-[#0a0a0a] py-1 shadow-xl"
+                    className="absolute right-0 z-10 mt-1 min-w-[160px] overflow-hidden rounded-lg border border-white/15 bg-[#0a0a0a] py-1 shadow-xl"
                     role="listbox"
                   >
                     <TargetMenuItem
@@ -226,7 +226,7 @@ export function ScanPromptComposer({
           <button
             type="button"
             onClick={handleCollapse}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[#777] transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/55 transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 cursor-pointer"
             aria-label="Collapse live prompt composer"
           >
             <ChevronDown className="h-4 w-4" />
@@ -234,7 +234,7 @@ export function ScanPromptComposer({
         </div>
       </div>
 
-      <div className="px-5 pt-4 pb-3">
+      <div className="px-4 pt-4 pb-3 sm:px-5">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -251,12 +251,12 @@ export function ScanPromptComposer({
           placeholder="Send a live prompt to the running pentest…"
           maxLength={4000}
           disabled={sending}
-          className="block w-full resize-none border-0 bg-transparent p-0 text-[15px] leading-6 text-white placeholder:text-[#444] focus:outline-none disabled:opacity-60 max-h-[160px] overflow-y-auto"
+          className="block w-full resize-none border-0 bg-transparent p-0 text-[15px] leading-6 text-white placeholder:text-white/25 focus:outline-none disabled:opacity-60 max-h-[160px] overflow-y-auto"
         />
       </div>
 
       <div className="flex items-center justify-between gap-3 px-4 pb-4">
-        <div className="text-xs text-[#666]">{feedback ?? "Press Enter to send."}</div>
+        <div className="text-xs text-white/40 truncate">{feedback ?? "Press Enter to send."}</div>
         <button
           type="button"
           onClick={(event) => {
@@ -265,9 +265,9 @@ export function ScanPromptComposer({
           }}
           disabled={sending || empty}
           className={cn(
-            "inline-flex h-10 min-w-[112px] items-center justify-center gap-2 rounded-full px-4 text-sm font-medium transition-colors",
+            "inline-flex h-10 min-w-[112px] flex-shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-medium transition-colors",
             sending || empty
-              ? "bg-white/[0.08] text-[#666]"
+              ? "bg-white/[0.08] text-white/40"
               : "bg-white text-black hover:bg-neutral-200"
           )}
         >
@@ -303,8 +303,8 @@ function TargetMenuItem({
         onSelect();
       }}
       className={cn(
-        "block w-full truncate px-3 py-1.5 text-left text-xs transition-colors hover:bg-white/[0.06]",
-        active ? "text-white" : "text-[#aaa]"
+        "block w-full cursor-pointer truncate px-3 py-1.5 text-left text-xs transition-colors hover:bg-white/[0.06]",
+        active ? "text-white" : "text-white/60"
       )}
     >
       {label}

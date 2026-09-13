@@ -7,6 +7,7 @@ import {
   type AuthStatus,
 } from "@/data/serverSource";
 import { track } from "@/lib/cta";
+import { card, primaryBtn, secondaryBtn } from "@/lib/ui";
 
 /**
  * The email-report / email-verification flow rendered as its own page (not a
@@ -183,24 +184,21 @@ export default function EmailReportView({
     <div className="mx-auto max-w-xl space-y-4">
       <button
         onClick={() => onExit(verifyOnly ? "history" : "overview")}
-        className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-[#888] transition-colors hover:text-white"
+        className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-white/45 transition-colors hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         {verifyOnly ? "Back to past runs" : "Back to results"}
       </button>
 
       <div className="flex items-center gap-2">
-        <Mail className="h-5 w-5 text-[#888]" aria-hidden="true" />
-        <h1 className="text-2xl font-semibold text-white">
+        <Mail className="h-5 w-5 text-white/45" aria-hidden="true" />
+        <h1 className="text-xl font-semibold text-white sm:text-2xl">
           {verifyOnly ? "Verify your email" : "Export report to PDF"}
         </h1>
       </div>
 
-      <div
-        className="w-full rounded-2xl bg-[rgba(255,255,255,0.02)] p-6"
-        style={{ border: "1px solid #2a2a2a" }}
-      >
-        <p className="mb-4 text-xs text-[#666]">
+      <div className={`${card} w-full p-5 sm:p-6`}>
+        <p className="mb-4 text-xs text-white/35">
           {verifyOnly
             ? "We send a one-time code to confirm it is you."
             : "Verified by a one-time code sent to your email"}
@@ -213,36 +211,30 @@ export default function EmailReportView({
           </div>
         )}
         {notice && !error && step !== "password" && (
-          <p className="mb-4 text-xs text-[#888]">{notice}</p>
+          <p className="mb-4 text-xs text-white/45">{notice}</p>
         )}
 
         {step === "disclosure" && (
           <div className="space-y-4">
-            <div
-              className="space-y-2.5 rounded-lg p-3.5"
-              style={{ border: "1px solid #222", background: "rgba(255,255,255,0.02)" }}
-            >
+            <div className="space-y-2.5 rounded-lg border border-white/10 bg-white/[0.02] p-3.5">
               <div className="flex items-start gap-2.5">
                 <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" aria-hidden="true" />
-                <p className="text-xs leading-relaxed text-[#aaa]">
+                <p className="text-xs leading-relaxed text-white/70">
                   We email an <span className="text-white">encrypted PDF</span>. Nothing else leaves your machine.
                 </p>
               </div>
               <div className="flex items-start gap-2.5">
-                <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#888]" aria-hidden="true" />
-                <p className="text-xs leading-relaxed text-[#aaa]">
+                <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/45" aria-hidden="true" />
+                <p className="text-xs leading-relaxed text-white/70">
                   Only you hold the password; Strix can&apos;t read it.
                 </p>
               </div>
             </div>
-            <button
-              onClick={startFlow}
-              className="w-full cursor-pointer rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90"
-            >
+            <button onClick={startFlow} className={`${primaryBtn} w-full`}>
               Export report
             </button>
             {verified && auth?.email && (
-              <p className="text-center text-xs text-[#666]">Sending to {auth.email}</p>
+              <p className="text-center text-xs text-white/35">Sending to {auth.email}</p>
             )}
           </div>
         )}
@@ -256,22 +248,17 @@ export default function EmailReportView({
             }}
           >
             <label className="block">
-              <span className="mb-1.5 block text-xs text-[#888]">Your work email</span>
+              <span className="mb-1.5 block text-xs text-white/45">Your work email</span>
               <input
                 type="email"
                 autoFocus
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full rounded-lg bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-[#444]"
-                style={{ border: "1px solid #2a2a2a" }}
+                className="w-full rounded-lg border border-white/15 bg-black px-3 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/40"
               />
             </label>
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
+            <button type="submit" disabled={busy} className={`${primaryBtn} w-full`}>
               {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
               Send me a code
             </button>
@@ -287,22 +274,17 @@ export default function EmailReportView({
             }}
           >
             <label className="block">
-              <span className="mb-1.5 block text-xs text-[#888]">6-digit code</span>
+              <span className="mb-1.5 block text-xs text-white/45">6-digit code</span>
               <input
                 inputMode="numeric"
                 autoFocus
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="123456"
-                className="w-full rounded-lg bg-black px-3 py-2.5 text-center text-lg font-mono tracking-[0.4em] text-white outline-none transition-colors focus:border-[#444]"
-                style={{ border: "1px solid #2a2a2a" }}
+                className="w-full rounded-lg border border-white/15 bg-black px-3 py-2.5 text-center text-lg font-mono tracking-[0.4em] text-white outline-none transition-colors focus:border-white/40"
               />
             </label>
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
+            <button type="submit" disabled={busy} className={`${primaryBtn} w-full`}>
               {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
               {verifyOnly ? "Verify" : "Verify and send"}
             </button>
@@ -313,7 +295,7 @@ export default function EmailReportView({
                 setError(null);
                 setNotice(null);
               }}
-              className="w-full cursor-pointer text-center text-xs text-[#666] transition-colors hover:text-[#aaa]"
+              className="w-full cursor-pointer text-center text-xs text-white/40 transition-colors hover:text-white/70"
             >
               Use a different email
             </button>
@@ -323,7 +305,7 @@ export default function EmailReportView({
         {step === "sending" && (
           <div className="flex flex-col items-center gap-3 py-8">
             <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden="true" />
-            <p className="text-sm text-[#aaa]">Generating and encrypting locally...</p>
+            <p className="text-sm text-white/70">Generating and encrypting locally...</p>
           </div>
         )}
 
@@ -336,31 +318,23 @@ export default function EmailReportView({
               </p>
             </div>
             <div>
-              <span className="mb-1.5 block text-xs text-[#888]">Your one-time password</span>
-              <div
-                className="flex items-center gap-2 rounded-lg bg-black p-3"
-                style={{ border: "1px solid #2a2a2a" }}
-              >
+              <span className="mb-1.5 block text-xs text-white/45">Your one-time password</span>
+              <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-black p-3">
                 <code className="flex-1 break-all font-mono text-base text-white">{password}</code>
                 <button
                   onClick={copyPassword}
-                  className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs text-[#aaa] transition-colors hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
-                  style={{ border: "1px solid #2a2a2a" }}
+                  className="flex cursor-pointer items-center gap-1 rounded-md border border-white/15 px-2 py-1 text-xs text-white/70 transition-colors hover:bg-white/5 hover:text-white"
                 >
                   {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                   {copied ? "Copied" : "Copy"}
                 </button>
               </div>
-              <p className="mt-2 text-xs text-[#666]">
+              <p className="mt-2 text-xs text-white/35">
                 Save this now. Strix never stores it, so we cannot show it again. File:{" "}
-                <span className="font-mono text-[#888]">{filename}</span>
+                <span className="font-mono text-white/50">{filename}</span>
               </p>
             </div>
-            <button
-              onClick={() => onExit("overview")}
-              className="w-full cursor-pointer rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[rgba(255,255,255,0.06)]"
-              style={{ border: "1px solid #2a2a2a" }}
-            >
+            <button onClick={() => onExit("overview")} className={`${secondaryBtn} w-full`}>
               Done
             </button>
           </div>
