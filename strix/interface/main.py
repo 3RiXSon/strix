@@ -424,6 +424,15 @@ def main() -> None:
         run_view(sys.argv[2:])
         return
 
+    # `strix mobile` serves the phone control plane (PWA). It needs no
+    # target or Docker itself: scans it launches pick their backend
+    # (auto/docker/local) when they start.
+    if len(sys.argv) > 1 and sys.argv[1] == "mobile":
+        from strix.interface.mobile.cli import run_mobile
+
+        run_mobile(sys.argv[2:])
+        return
+
     # `strix auth …` manages model-subscription sign-in and exits; it needs no
     # target, Docker, or scan setup.
     if len(sys.argv) > 1 and sys.argv[1] == "auth":
@@ -439,8 +448,20 @@ def main() -> None:
             os.execv(sys.executable, sys.argv)  # noqa: S606  # nosec B606
         sys.exit(0)
 
-    check_docker_installed()
-    pull_docker_image()
+    # Docker gates only apply to the docker backend. `local` (phones /
+    # Termux) and `auto` resolving to it run agent tools on the host, so
+    # demanding a daemon here would re-block exactly the machines the
+    # mobile path exists for.
+    from strix.runtime.backends import resolve_backend_name
+
+    if resolve_backend_name(load_settings().runtime.backend) == "docker":
+        check_docker_installed()
+        pull_docker_image()
+    else:
+        logger.info(
+            "Non-Docker backend selected; skipping Docker checks. "
+            "Agent tools will run directly on this host without isolation.",
+        )
 
     # In setup mode the TUI collects the target, then runs prepare_run(),
     # warm-up, and telemetry itself once the user starts the scan.

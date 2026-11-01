@@ -1,0 +1,53 @@
+---
+title: "Strix Mobile"
+description: "Run and control Strix from a phone — Android on-device, or any phone as a remote control."
+---
+
+Strix Mobile is a phone-first, installable web app (`strix mobile`) to launch scans, watch findings, stop/resume runs, and read reports. It exists because the desktop build cannot run on a phone as-is; each obstacle has a specific workaround:
+
+| Obstacle | Workaround |
+|---|---|
+| Docker daemon does not exist on Android/iOS | `local` runtime backend: agent tools run directly on the host via the SDK's Unix-local sandbox — no container, no image pull |
+| Kali sandbox image (GBs, amd64 tools) | Capability detection: the agent gets whatever is installed (`curl`, `nmap`, …); the app's **Device** tab shows exactly what is present |
+| Caido proxy sidecar runs inside the container | Proxy tools degrade gracefully; agent HTTP goes direct. Everything else works |
+| Absolute `/workspace` paths; Android `/` is read-only | The local session translates `/workspace/...` to the real workspace (`~/.strix/local-workspace`) and symlinks it where permitted |
+| Interactive UI is a terminal TUI (plus a Go binary) | The mobile PWA replaces the TUI: touch-first, bottom navigation, no terminal needed |
+| Mobile OSes kill background tabs/apps | Scans are detached OS processes. Close the browser, let the phone sleep — reopen the app and the scan is still tracked; interrupted scans support **Resume** |
+| Service workers / install prompts need a secure context | Works fully as a web page on LAN http; use localhost, https, or a mesh VPN (e.g. Tailscale) for Add-to-Home-Screen install |
+| iOS cannot run Python/Docker in the background at all | Remote-control mode: run `strix mobile` on a desktop/VPS and drive it from the iPhone. Same app, full Docker backend on the host |
+
+## Android (Termux) — scan on the phone itself
+
+```bash
+# In Termux (from F-Droid / GitHub, not the Play Store build):
+curl -sSL https://raw.githubusercontent.com/usestrix/strix/main/scripts/termux-install.sh | bash
+source ~/.strix/mobile-env.sh
+export STRIX_LLM="openai/gpt-5.4"   # or set model + key later in Settings
+strix mobile
+```
+
+Open the printed link on the phone, then **Add to Home Screen**. Set backend **auto** (default) and it picks `local` automatically when no Docker daemon answers.
+
+<Warning>
+Local mode has **no container isolation**: agent shell commands run as your Termux user. Use a dedicated device/account, and only scan targets you are authorized to test.
+</Warning>
+
+## iPhone / iPad — remote-control a host
+
+iOS cannot host the scan engine, so run the engine where Docker (or Termux-style local mode) works and use the phone as the controller:
+
+```bash
+# On the desktop/VPS:
+strix mobile --host 0.0.0.0 --port 7681
+```
+
+Open the printed (tokenized) link on the phone — preferably over Tailscale or your LAN, never a public port-forward. The token authorizes that browser; anyone with the link can start scans on the host, so treat it like a password.
+
+## Using the app
+
+- **New scan** — targets (one per line), quick/standard/deep, optional instructions and budget. Defaults to `quick` for phone-friendly runs.
+- **Scans** — live status for every run; tap in for severity counts, findings, the report, and the scan log. **Stop** terminates the scan's process group; **Resume** continues an interrupted run with full agent history.
+- **Device** — resolved backend, Docker availability, LLM config, and which scanner tools exist on the scan host.
+- **Settings** — model, API key (stored on the scan host at `~/.strix/mobile-config.json`, `0600`, never sent back to the phone), API base for local models, and backend (`auto`/`docker`/`local`).
+
+Headless scans launched from the app keep the normal exit-code contract (`0` clean, `2` findings, `1` error) and write the usual `strix_runs/<run>/` artifacts, so `strix view` and resume work interchangeably with CLI scans.

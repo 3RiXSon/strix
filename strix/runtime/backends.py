@@ -50,11 +50,49 @@ async def _docker_backend(
     return client, session
 
 
+async def _local_backend(
+    *,
+    image: str,
+    manifest: Manifest,
+    exposed_ports: tuple[int, ...],
+    bind_mounts: list[dict[str, Any]] | None = None,
+) -> tuple[Any, Any]:
+    """Host-directory backend for machines with no Docker daemon (phones,
+    Termux, minimal VPS). Imported lazily like the Docker backend so merely
+    importing this registry never pulls the SDK's sandbox stack."""
+    from strix.runtime.local_backend import local_backend
+
+    return await local_backend(
+        image=image,
+        manifest=manifest,
+        exposed_ports=exposed_ports,
+        bind_mounts=bind_mounts,
+    )
+
+
 _BACKENDS: dict[str, SandboxBackend] = {
     "docker": _docker_backend,
+    "local": _local_backend,
 }
 
 _BIND_MOUNT_BACKENDS: set[str] = {"docker"}
+
+
+def resolve_backend_name(name: str) -> str:
+    """Resolve ``auto`` to a concrete backend based on what the host has.
+
+    ``auto`` picks Docker when a daemon actually answers (full isolation,
+    Kali tooling, Caido) and falls back to ``local`` when it does not — the
+    phone/Termux case. Any other value passes through unchanged so typos
+    still surface in :func:`get_backend`.
+    """
+    if name != "auto":
+        return name
+    from strix.runtime.capabilities import docker_daemon_available
+
+    resolved = "docker" if docker_daemon_available() else "local"
+    logger.info("STRIX_RUNTIME_BACKEND=auto resolved to %r", resolved)
+    return resolved
 
 
 def get_backend(name: str) -> SandboxBackend:
@@ -65,9 +103,9 @@ def get_backend(name: str) -> SandboxBackend:
             no fallback. Unknown values raise so config typos surface
             immediately instead of silently picking a default.
     """
-    backend = _BACKENDS.get(name)
+    backend = _BACKENDS.get(resolve_backend_name(name))
     if backend is None:
-        supported = ", ".join(sorted(_BACKENDS))
+        supported = ", ".join([*sorted(_BACKENDS), "auto"])
         raise ValueError(
             f"Unknown STRIX_RUNTIME_BACKEND: {name!r} (supported: {supported})",
         )
@@ -98,8 +136,8 @@ def register_backend(
 
 
 def backend_supports_bind_mounts(name: str) -> bool:
-    return name in _BIND_MOUNT_BACKENDS
+    return resolve_backend_name(name) in _BIND_MOUNT_BACKENDS
 
 
 def supported_backends() -> list[str]:
-    return sorted(_BACKENDS)
+    return [*sorted(_BACKENDS), "auto"]

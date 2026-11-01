@@ -180,6 +180,17 @@ strix view my-run-name
 - **History**: browse past runs on this machine and jump between them.
 - **Reports**: generate a shareable report and email it to yourself or your team.
 
+## 📱 Strix Mobile
+
+Run and control Strix from a phone. `strix mobile` serves an installable web app to launch scans, watch findings live, and stop/resume runs — scans run as detached processes, so they survive the phone sleeping or the browser closing.
+
+```bash
+strix mobile                    # on the scan host; open the printed link on your phone
+strix mobile --host 0.0.0.0     # let a phone on your LAN / mesh VPN reach it
+```
+
+No Docker? No problem: `STRIX_RUNTIME_BACKEND=auto` (the mobile default) falls back to a `local` backend that runs agent tools directly on the host — which is how Strix works on Android via Termux (`scripts/termux-install.sh`). iPhones drive a desktop/VPS host remotely, since iOS can't host the engine. See [Mobile docs](docs/usage/mobile.mdx) for setup and the security trade-offs of local mode.
+
 ---
 
 ## Usage Examples
