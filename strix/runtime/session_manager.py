@@ -13,7 +13,11 @@ from agents.sandbox.manifest import Environment, Manifest
 
 from strix.config import load_settings
 from strix.core.paths import run_dir_for, runtime_state_dir
-from strix.runtime.backends import backend_supports_bind_mounts, get_backend
+from strix.runtime.backends import (
+    backend_supports_bind_mounts,
+    get_backend,
+    resolve_backend_name,
+)
 from strix.runtime.caido_bootstrap import bootstrap_caido
 
 
@@ -275,8 +279,9 @@ async def create_or_reuse(
         logger.info("Reusing existing sandbox session for scan %s", scan_id)
         return cached
 
-    backend_name = load_settings().runtime.backend
+    backend_name = resolve_backend_name(load_settings().runtime.backend)
     backend = get_backend(backend_name)
+    is_local = backend_name == "local"
 
     if backend_supports_bind_mounts(backend_name):
         bind_mounts = build_bind_mounts(local_sources)
@@ -298,20 +303,30 @@ async def create_or_reuse(
     # agent-browser CDP daemon's localhost traffic from looping back
     # through Caido.
     container_caido_url = f"http://127.0.0.1:{_CONTAINER_CAIDO_PORT}"
-    manifest = Manifest(
-        entries=entries,
-        environment=Environment(
-            value={
-                "PYTHONUNBUFFERED": "1",
-                "HOST_GATEWAY": "host.docker.internal",
-                **_host_identity_env(),
-                "http_proxy": container_caido_url,
-                "https_proxy": container_caido_url,
-                "ALL_PROXY": container_caido_url,
-                "NO_PROXY": "localhost,127.0.0.1",
-            },
-        ),
-    )
+    if is_local:
+        # No in-container Caido sidecar exists on the host: pointing the
+        # proxy env at a dead port would break every agent HTTP call, so
+        # traffic goes direct and the proxy tools degrade on their own
+        # (they already handle a None caido_client).
+        manifest = Manifest(
+            entries=entries,
+            environment=Environment(value={"PYTHONUNBUFFERED": "1"}),
+        )
+    else:
+        manifest = Manifest(
+            entries=entries,
+            environment=Environment(
+                value={
+                    "PYTHONUNBUFFERED": "1",
+                    "HOST_GATEWAY": "host.docker.internal",
+                    **_host_identity_env(),
+                    "http_proxy": container_caido_url,
+                    "https_proxy": container_caido_url,
+                    "ALL_PROXY": container_caido_url,
+                    "NO_PROXY": "localhost,127.0.0.1",
+                },
+            ),
+        )
 
     logger.info(
         "Creating sandbox session for scan %s (backend=%s, image=%s)",
@@ -319,25 +334,27 @@ async def create_or_reuse(
         backend_name,
         image,
     )
-    report("Starting sandbox container")
+    report("Starting sandbox" if is_local else "Starting sandbox container")
     client, session = await backend(
         image=image,
         manifest=manifest,
-        exposed_ports=(_CONTAINER_CAIDO_PORT,),
+        exposed_ports=() if is_local else (_CONTAINER_CAIDO_PORT,),
         bind_mounts=bind_mounts,
     )
 
-    report("Setting up the proxy")
-    caido_endpoint = await session.resolve_exposed_port(_CONTAINER_CAIDO_PORT)
-    scheme = "https" if caido_endpoint.tls else "http"
-    host_caido_url = f"{scheme}://{caido_endpoint.host}:{caido_endpoint.port}"
-    logger.debug("Caido host endpoint resolved: %s", host_caido_url)
+    caido_client = None
+    if not is_local:
+        report("Setting up the proxy")
+        caido_endpoint = await session.resolve_exposed_port(_CONTAINER_CAIDO_PORT)
+        scheme = "https" if caido_endpoint.tls else "http"
+        host_caido_url = f"{scheme}://{caido_endpoint.host}:{caido_endpoint.port}"
+        logger.debug("Caido host endpoint resolved: %s", host_caido_url)
 
-    caido_client = await bootstrap_caido(
-        session,
-        host_url=host_caido_url,
-        container_url=container_caido_url,
-    )
+        caido_client = await bootstrap_caido(
+            session,
+            host_url=host_caido_url,
+            container_url=container_caido_url,
+        )
 
     bundle = {
         "client": client,

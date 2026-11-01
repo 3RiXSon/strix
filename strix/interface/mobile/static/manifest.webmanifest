@@ -1,0 +1,14 @@
+{
+  "name": "Strix Mobile",
+  "short_name": "Strix",
+  "description": "Launch and monitor Strix penetration tests from your phone.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
